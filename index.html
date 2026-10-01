@@ -81,6 +81,8 @@ button:focus-visible,input:focus-visible{outline:2px solid var(--tip);outline-of
 
 /* 좌측 채비 패널 */
 .rig{position:absolute;left:var(--sl);top:calc(var(--st) + 82px);bottom:var(--sb);width:min(236px,30vw);padding:10px;display:flex;flex-direction:column;gap:8px;overflow-y:auto;transition:transform .3s,opacity .3s}
+.top,.cond,.toast,#env-pill,.envnote{transition:opacity .35s}
+body.clean .top,body.clean .cond,body.clean .toast,body.clean #hud-wxnote{opacity:0!important;pointer-events:none!important}
 .rig.off{transform:translateX(-120%);opacity:0;pointer-events:none}
 .rig h4{margin:0;font-size:11px;color:var(--mute);font-weight:500;letter-spacing:.06em;display:flex;justify-content:space-between}
 .rig h4 b{color:var(--foam);font-weight:600}
@@ -225,6 +227,21 @@ input[type=range]{width:100%;accent-color:var(--float);margin:2px 0}
 #warn small{display:block;font-size:14px;margin-top:2px;opacity:.9;font-family:'Noto Sans KR',sans-serif}
 #warn.on{opacity:1;animation:wblink .35s infinite alternate}
 @keyframes wblink{from{transform:translate(-50%,-50%) scale(.96)}to{transform:translate(-50%,-50%) scale(1.06)}}
+:root{--rb:40px}
+.lvring{width:34px;height:34px;border-width:2px}.lvring b{font-size:11px}
+.badge{padding:3px 10px 3px 3px;gap:6px}.bx{min-width:56px;gap:2px}.xpt{font-size:9px}.badge .xpb{height:5px}
+.rbtn{width:36px;height:36px;font-size:16px}.rbtn.txt{font-size:10px;min-width:36px;padding:0 8px}#btn-q,#btn-snd,#btn-menu{min-width:36px}
+.money{padding:4px 12px 4px 6px}.money .coin{width:17px;height:17px}.money b{font-size:15px}
+.env{padding:5px 11px;gap:6px;cursor:pointer}.env .mono{font-size:16px}.env b{font-size:11px}
+.env .dot,.env small,.env #hud-tide,.env #hud-wx{display:none}
+.env.open .dot,.env.open small{display:inline-block}.env.open #hud-tide,.env.open #hud-wx{display:inline}
+.cond{display:none}body.envopen .cond{display:block}
+.rail{top:calc(var(--st) + 46px);grid-template-columns:repeat(2,42px);gap:5px}
+.rail button{width:42px;height:42px;border-radius:12px}.rail button span{font-size:16px}.rail button small{font-size:8.5px;margin-top:2px}
+.dock{gap:5px}.tile{width:68px;min-height:46px;border-radius:12px;padding:3px}.tile .ti{font-size:15px}.tile b{font-size:10.5px}.tile small{font-size:8.5px}
+.depthbox{min-width:118px;padding:5px 9px 3px;border-radius:12px}.depthbox h4{font-size:9.5px}.depthbox h4 b{font-size:11px}
+.pop{bottom:calc(var(--sb) + 58px)}
+@media (max-height:420px){.rail{top:calc(var(--st) + 44px)}.rail button{height:42px}.lvring{width:32px;height:32px}.tile{min-height:44px}}
 </style>
 
 <div id="stage">
@@ -2884,7 +2901,7 @@ function syncUI() {
   setIf('dis', dis, v => { el.main.disabled = v; });
   setIf('alt', m === 'waiting' || m === 'bite', v => { el.alt.hidden = !v; });
   setIf('mode', m, () => { renderSpots(); renderBaits(); renderFloats(); syncDepth(); });
-  $('rig').classList.toggle('off', m !== 'idle'); $('rail').classList.toggle('off', m !== 'idle'); if (m !== 'idle') document.querySelectorAll('.pop').forEach(p => p.hidden = true);
+  document.body.classList.toggle('clean', m === 'casting' || m === 'flying' || m === 'waiting'); $('rig').classList.toggle('off', m !== 'idle'); $('rail').classList.toggle('off', m !== 'idle'); if (m !== 'idle') document.querySelectorAll('.pop').forEach(p => p.hidden = true);
   el.meter.hidden = m !== 'casting'; el.gauge.hidden = m !== 'fight';
   if (m === 'idle' && !G.baited && G.money < BAITS[0].price) { G.money += 5000; say('용돈 ' + won(5000) + '을 받았어요'); save(); }
   if (m === 'casting') {
@@ -3009,6 +3026,7 @@ const bgmBtn = $('btn-bgm');
 try { if (localStorage.getItem('jjinaksi.bgm') === '0') { SFX.musicOn = false; bgmBtn.classList.add('off'); } } catch (e) {}
 bgmBtn.addEventListener('click', () => { SFX.unlock(); SFX.setMusic(!SFX.musicOn); bgmBtn.classList.toggle('off', !SFX.musicOn); try { localStorage.setItem('jjinaksi.bgm', SFX.musicOn ? '1' : '0'); } catch (e) {} });
 document.addEventListener('pointerdown', e => { const b = e.target.closest('button'); if (!b || b.id === 'btn-main' || b.id === 'btn-lever' || b.id === 'drag-up' || b.id === 'drag-dn' || b.disabled) return; SFX.unlock(); SFX.tap(b.classList.contains('tab') ? 1 : 0); }, true);
+{ const ev = $('hud-wx').parentElement; let evT = 0; ev.addEventListener('click', e => { if (!ev.classList.contains('open')) { ev.classList.add('open'); document.body.classList.add('envopen'); clearTimeout(evT); evT = setTimeout(() => { ev.classList.remove('open'); document.body.classList.remove('envopen'); }, 4500); e.stopImmediatePropagation(); } }, true); }
 $('hud-wx').parentElement.addEventListener('click', () => { if (!TEST_MAXLEVEL) return; const L = ['calm', 'clear', 'cloud', 'rough', 'rain']; G.wx = L[(L.indexOf(G.wx) + 1) % L.length]; say('날씨: ' + WX[G.wx].name + ' (테스트)'); });
 
 </script>
