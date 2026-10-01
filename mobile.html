@@ -242,6 +242,17 @@ input[type=range]{width:100%;accent-color:var(--float);margin:2px 0}
 .depthbox{min-width:118px;padding:5px 9px 3px;border-radius:12px}.depthbox h4{font-size:9.5px}.depthbox h4 b{font-size:11px}
 .pop{bottom:calc(var(--sb) + 58px)}
 @media (max-height:420px){.rail{top:calc(var(--st) + 44px)}.rail button{height:42px}.lvring{width:32px;height:32px}.tile{min-height:44px}}
+
+.rail{display:block}
+.rail .rt{width:auto;height:34px;padding:0 12px;border-radius:12px;flex-direction:row;gap:6px;font-family:var(--font-display);font-size:13px;color:var(--foam);display:flex}
+.rail .rt i{font-style:normal;transition:transform .2s;font-size:11px}.rail.open .rt i{transform:rotate(180deg)}
+.rail .rl{display:none;gap:2px;margin-top:5px;padding:5px;border-radius:12px;width:124px}
+.rail.open .rl{display:grid;grid-template-columns:1fr 1fr;width:216px}.rail{z-index:4}
+.rail .rl button{width:100%;height:34px;border-radius:9px;flex-direction:row;justify-content:flex-start;gap:8px;padding:0 10px;border:0;background:transparent}
+.rail .rl button span{font-size:16px}.rail .rl button small{font-size:12px;margin:0;font-weight:500}
+.rail .rl button:active{background:var(--tide)}
+.rail{top:calc(var(--st) + 44px)}
+#menu{z-index:20}
 </style>
 
 <div id="stage">
@@ -264,13 +275,13 @@ input[type=range]{width:100%;accent-color:var(--float);margin:2px 0}
   <div id="warn">⚠ 줄이 터질 것 같아요!<small>레버를 풀거나 감기를 멈추세요</small></div>
   <div class="toast" id="toast" role="status" aria-live="polite"></div>
 
-  <nav class="rail" id="rail" aria-label="메뉴">
-    <button data-open="spots"><span>🗺</span><small>포인트</small></button>
+  <nav class="rail" id="rail" aria-label="메뉴"><button id="rail-t" class="rt glass">📋 메뉴 <i>▾</i></button><div class="rl glass">    <button data-open="spots"><span>🗺</span><small>포인트</small></button>
     <button data-open="shop"><span>🛒</span><small>상점</small></button>
     <button data-open="gear"><span>🎒</span><small>내 장비</small></button>
     <button data-open="chum"><span>🧪</span><small>밑밥</small></button>
     <button data-open="dex"><span>📖</span><small>도감</small></button>
     <button data-open="catch"><span>🐟</span><small>조과</small></button>
+  </div>
   </nav>
 
   <div class="dock" id="rig">
@@ -1178,7 +1189,14 @@ const FSTYLE = {
   ureok: { back: '#2c2a22', side: '#5d5a4c', belly: '#9d9884', fin: '#3a382e', spots: '#1d1c17' }, beng: { back: '#2d3a34', side: '#5b6459', belly: '#9aa296', fin: '#3a4540' },
   gam: { back: '#4f5964', side: '#9aa6b0', belly: '#e6ebee', fin: '#5a6670', band: '#222a30' }, nong: { back: '#4a5a60', side: '#aebfc4', belly: '#f0f3f3', fin: '#6b7a80', spots: '#38464a' },
   cham: { back: '#c4635f', side: '#e58a86', belly: '#f6d3cf', fin: '#d4726e', spots: '#5db0d8' }, dol: { back: '#161a1c', side: '#c9d3d6', belly: '#e9eeef', fin: '#2a3033', stripes: true },
-  bok: { back: '#7a7656', side: '#b9b59a', belly: '#eee6c8', fin: '#8a8566', spots: '#4a4a36' }
+  bok: { back: '#7a7656', side: '#b9b59a', belly: '#eee6c8', fin: '#8a8566', spots: '#4a4a36' },
+  mi: { back: '#4a2f22', side: '#8a5a3c', belly: '#cfa27a', fin: '#6a4028', spots: '#2f1c12' }, dok: { back: '#5f6a3a', side: '#a3a864', belly: '#e0dcaa', fin: '#c9b24a', spots: '#6b6f3f' },
+  hwang: { back: '#5a5a3c', side: '#a8a37a', belly: '#e6dfb8', fin: '#d9683a', band: '#d9683a' }, godeung: { back: '#1f5a66', side: '#8fb4bb', belly: '#eef3f1', fin: '#3f7f8a', spots: '#163d44' },
+  nol: { back: '#3f6a3a', side: '#7a9f5a', belly: '#d6dca6', fin: '#d98a3a', spots: '#2f4f2a' }, jwinore: { back: '#3f3220', side: '#6b5230', belly: '#b09a70', fin: '#4a3a24', spots: '#2a2014' },
+  sung: { back: '#52605f', side: '#aeb9ba', belly: '#f1f3f1', fin: '#6f7b7c' }, bori: { back: '#8f845c', side: '#d6c9a5', belly: '#f4efe0', fin: '#b5a97f' },
+  yeol: { back: '#8a2a20', side: '#c24a3a', belly: '#eaa58a', fin: '#9a3326' }, gal: { back: '#8fa0a6', side: '#d4dde0', belly: '#f1f5f6', fin: '#aebcc2' },
+  sam: { back: '#4f6672', side: '#8fa0aa', belly: '#e8eef0', fin: '#5f7480', spots: '#3a4c56' }, jeon: { back: '#4d6a74', side: '#9db5bd', belly: '#f1f5f5', fin: '#7f9aa4', spots: '#35505a' },
+  seong: { back: '#8a3a28', side: '#c96a4a', belly: '#ecc2a4', fin: '#3f8f6a', spots: '#6a2a1c' }
 };
 function fishEnv(s) { return Math.pow(Math.sin(Math.PI * Math.pow(clamp(s, 0, 1), .72)), .72); }
 function buildFishGeo(f) {
@@ -1332,16 +1350,35 @@ const SPOT_DEFS = [
   ['yeongil', '포항 영일만 대형 방파제', '동해', 'big', 24, '거센 조류. 대형 어종이 노려요'],
   ['geomun', '거문도 간출여', '남해', 'yeo', 27, '물이 빠지면 드러나는 여. 대물 포인트'],
   ['chuja', '추자도 간출여', '제주', 'yeo', 30, '전국구 명소. 감성돔·돌돔 대물이 나와요'],
-  ['hongdo', '홍도 간출여', '서해', 'yeo', 34, '최고 난도의 명소. 참돔 대물이 노려요']
+  ['hongdo', '홍도 간출여', '서해', 'yeo', 34, '최고 난도의 명소. 참돔 대물이 노려요'],
+  ['jukbyeon', '울진 죽변항 방파제', '동해', 'small', 2, '울진 방파제. 감성돔·벵에돔을 노리면 미역치·황어·고등어 같은 잡어가 함께 올라와요'],
+  ['anheung', '태안 안흥항 방파제', '서해', 'small', 2, '서해 항구. 숭어·전어·보리멸이 자주 올라와요'],
+  ['jangho', '삼척 장호항 방파제', '동해', 'small', 4, '불볼락과 황어가 잘 붙는 동해 작은 항구'],
+  ['mukho', '동해 묵호항 방파제', '동해', 'mid', 7, '고등어·삼치 떼가 들어오고 쥐노래미도 나와요'],
+  ['hanlim', '제주 한림항 방파제', '제주', 'mid', 9, '제주 방파제. 독가시치·용치놀래기가 잔뜩 붙어요'],
+  ['bieung', '군산 비응항 방파제', '서해', 'mid', 11, '전어·숭어·성대가 올라오는 서해 중형 방파제'],
+  ['homigot', '포항 호미곶 도보 갯바위', '동해', 'rock', 15, '동해 끝자락 갯바위. 벵에돔·돌돔과 불볼락이 나와요'],
+  ['taejong', '부산 태종대 도보 갯바위', '남해', 'rock', 17, '갈치·독가시치가 많고 감성돔도 기대할 수 있어요'],
+  ['cheongsan', '완도 청산도 도보 갯바위', '남해', 'rock', 19, '맑은 남해 갯바위. 감성돔과 용치놀래기가 올라와요'],
+  ['seongsan', '제주 성산 도보 갯바위', '제주', 'rock', 20, '돌돔 명소. 독가시치와 삼치도 섞여요'],
+  ['ganjeol', '울산 간절곶 대형 방파제', '동해', 'big', 22, '삼치와 고등어 떼가 몰리는 큰 방파제'],
+  ['jisimdo', '거제 지심도 도보 갯바위', '남해', 'rock', 23, '감성돔 포인트. 쥐노래미와 성대도 올라와요'],
+  ['ulleung', '울릉도 저동항 대형 방파제', '동해', 'big', 26, '먼 바다 항구. 불볼락·삼치·대형 어종이 노려요'],
+  ['heuksan', '흑산도 간출여', '서해', 'yeo', 32, '서해 외딴 섬의 여. 우럭·농어 대물이 나와요']
 ];
 /* 조수간만의 차로 생기는 수위 변화 (m, 한쪽 방향 최대치). 게임 시간이 빨라서 일부러 작게 잡았어요 */
 const TIDE_AMP = { '서해': .6, '남해': .4, '제주': .25, '동해': .1 };
-const SPOTS = SPOT_DEFS.map(([id, name, region, tier, lv, desc], i) => {
-  const T = TIERS[tier], r = REGION[region] || {}, mult = {}, u = (i * 37 % 10) / 9;
-  for (const k in T.base) mult[k] = Math.round(T.base[k] * (r[k] == null ? 1 : r[k]) * 100) / 100;
-  return { tideAmp: TIDE_AMP[region] || .1, id, name, region, tier, tierLabel: T.label, type: T.type, stand: T.stand, lv, desc, mult, zone: T.zone, exp: T.exp, seed: i,
-    depth: Math.round(T.depth[0] + (T.depth[1] - T.depth[0]) * u), flow: Math.round((T.flow[0] + (T.flow[1] - T.flow[0]) * u) * 100) / 100 };
-});
+
+/* 포인트별 단골 어종 (곱셈 배수). 지역·포인트 크기와 별개로 그 포인트에서 특히 잘 올라오는 고기 */
+const SPOT_LOC = {
+  sacheon: { hwang: 1.5, mi: 1.3, godeung: 1.3 }, sinjin: { sung: 1.4, jeon: 1.3, bori: 1.4 }, guryongpo: { bol: 1.3, yeol: 1.3, godeung: 1.3 }, samdeok: { nol: 1.3, dok: 1.2, gal: 1.2 },
+  daepo: { aji: 1.3, gal: 1.3, nol: 1.2 }, imwon: { beng: 1.3, mi: 1.3, jwinore: 1.2 }, ando: { dok: 1.3, jwinore: 1.2, gam: 1.2 }, hupo: { beng: 1.5, mi: 1.3, hwang: 1.2, yeol: 1.2 },
+  mijo: { gam: 1.3, nol: 1.2 }, seogwipo: { dok: 1.5, dol: 1.2 }, gadeok: { gal: 1.3, sam: 1.2 }, yeongil: { godeung: 1.3, sam: 1.3 },
+  jukbyeon: { gam: 6, beng: 5, mi: 1.5, hwang: 1.4, mang: 1.3, bol: 1.2, bok: 1.2, aji: 1.2, godeung: 1.5, ureok: 1.1 }, anheung: { sung: 1.4, jeon: 1.3, bori: 1.2, nong: 1.2 },
+  jangho: { yeol: 1.5, bol: 1.4, hwang: 1.2 }, mukho: { godeung: 1.4, sam: 1.3, jwinore: 1.3 }, hanlim: { dok: 1.5, nol: 1.5, beng: 1.3, bok: 1.3 }, bieung: { jeon: 1.5, sung: 1.5, seong: 1.4 },
+  homigot: { beng: 1.3, dol: 1.3, yeol: 1.3 }, taejong: { gal: 1.6, dok: 1.4, nol: 1.3, gam: 1.2 }, cheongsan: { gam: 1.4, nol: 1.4, dok: 1.3 }, seongsan: { dol: 1.4, dok: 1.5, sam: 1.3, cham: 1.2 },
+  ganjeol: { sam: 1.5, godeung: 1.4, nong: 1.2 }, jisimdo: { gam: 1.5, jwinore: 1.2, seong: 1.2 }, ulleung: { cham: .8, dol: 1.3, yeol: 1.5, sam: 1.5 }, heuksan: { ureok: 1.5, nong: 1.4, bol: 1.2, sung: 1.2 }
+};
 
 /* 레벨: 누적 경험치 50 × (레벨-1)² */
 const xpFor = L => 50 * (L - 1) * (L - 1);
@@ -1371,8 +1408,31 @@ const FISH = [
   { id: 'nong',  name: '농어',   depth: [.5, 5],   baits: { worm: 1, krill: .4 }, time: { dawn: 1.3, day: .4, dusk: 1.2, night: 1.5 }, peak: [8, 9, 10, 11], size: [45, 95], k: 10, price: 22000, power: .9, bite: 'dive', base: .35, chum: 1.1, col: '#aebfc4', h: .17, tip: '얕은 곳에서 갑자기 차고 나가요. 힘이 엄청나요.' },
   { id: 'cham',  name: '참돔',   depth: [5, 14],   baits: { krill: 1, mussel: .4 }, time: { dawn: 1.3, day: .9, dusk: 1.3, night: .3 }, peak: [4, 5, 10, 11], size: [30, 80], k: 16, price: 32000, power: .85, bite: 'dive', base: .35, chum: 1.8, col: '#e58a86', h: .3, tip: '조류가 센 깊은 곳에서 찌를 확 끌고 들어가요.' },
   { id: 'dol',   name: '돌돔',   depth: [3, 10],   baits: { crab: 1.3, mussel: 1 }, time: { dawn: .9, day: 1.3, dusk: .7, night: .2 }, peak: [7, 8, 9, 10], size: [28, 60], k: 20, price: 70000, power: .95, bite: 'sharp', base: .2, chum: 1, col: '#c9d3d6', h: .32, stripes: true, tip: '바다낚시의 대물. 게나 홍합살로 노려요. 줄이 터지기 쉬워요.' },
-  { id: 'bok',   name: '복어',   depth: [.5, 9],   baits: { krill: 1, worm: 1, mussel: 1, crab: .6 }, time: { dawn: 1, day: 1, dusk: 1, night: 1 }, peak: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12], size: [12, 28], k: 25, price: 0, power: .2, bite: 'thief', base: 1, chum: 1.2, col: '#b9b59a', h: .4, thief: true, tip: '미끼만 뜯어가는 불청객. 독이 있어 놓아줘요.' }
+  { id: 'bok',   name: '복어',   depth: [.5, 9],   baits: { krill: 1, worm: 1, mussel: 1, crab: .6 }, time: { dawn: 1, day: 1, dusk: 1, night: 1 }, peak: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12], size: [12, 28], k: 25, price: 0, power: .2, bite: 'thief', base: 1, chum: 1.2, col: '#b9b59a', h: .4, thief: true, tip: '미끼만 뜯어가는 불청객. 독이 있어 놓아줘요.' },
+  /* ---- 잡어 · 부수 어종 (지역마다 자주 올라오는 고기) ---- */
+  { id: 'mi',      name: '미역치',   junk: true, depth: [.5, 6], baits: { worm: 1, krill: .8, mussel: .6 }, time: { dawn: 1, day: 1, dusk: 1, night: 1.2 }, peak: [5, 6, 7, 8, 9, 10, 11], size: [8, 18], k: 20, price: 3000, power: .15, bite: 'tick', base: 1.1, chum: 1.1, col: '#8a5a3c', h: .22, reg: { '동해': 1.6, '남해': 1.2, '서해': .4, '제주': .8 }, tiers: { small: 1.3, mid: 1.3, yeo: .6 }, tip: '등지느러미에 독가시가 있어요! 바닥 근처에서 미끼를 깨작거리는 방파제 단골 잡어.' },
+  { id: 'dok',     name: '독가시치', junk: true, depth: [1, 8], baits: { krill: 1, worm: .7, mussel: .4 }, time: { dawn: 1, day: 1, dusk: 1, night: .5 }, peak: [7, 8, 9, 10, 11], size: [15, 35], k: 18, price: 5000, power: .3, bite: 'slow', base: .9, chum: 1.4, col: '#8a8f5a', h: .3, reg: { '동해': .5, '남해': 1.3, '서해': 0, '제주': 1.6 }, tiers: { rock: 1.2, yeo: 1.2 }, tip: '남쪽 바다 잡어. 지느러미 독가시를 조심하세요. 크릴 밑밥에 잘 올라와요.' },
+  { id: 'hwang',   name: '황어',     junk: true, depth: [.5, 4], baits: { worm: 1, krill: .8, mussel: .3 }, time: { dawn: 1.2, day: 1, dusk: 1.1, night: .3 }, peak: [2, 3, 4, 5, 11, 12], size: [20, 40], k: 14, price: 6000, power: .35, bite: 'tick', base: 1, chum: 1.2, col: '#a8a37a', h: .22, reg: { '동해': 1.8, '남해': .3, '서해': .3, '제주': 0 }, tiers: { small: 1.4, mid: 1.2, rock: .8, big: .6, yeo: .3 }, tip: '동해안 하구 근처 방파제에서 올라와요. 산란기엔 몸에 주황 줄이 들어요.' },
+  { id: 'godeung', name: '고등어',   junk: true, depth: [1, 7], baits: { krill: 1, worm: .3 }, time: { dawn: 1.4, day: .9, dusk: 1.4, night: .6 }, peak: [8, 9, 10, 11], size: [22, 42], k: 10, price: 7000, power: .5, bite: 'sharp', base: 1.1, chum: 2.2, col: '#4a7f8c', h: .16, reg: { '동해': 1.5, '남해': 1.3, '서해': .5, '제주': 1 }, tip: '무리를 지어 몰려다녀요. 밑밥을 치면 우르르 올라와요. 손맛이 좋아요.' },
+  { id: 'nol',     name: '용치놀래기', junk: true, depth: [1, 6], baits: { worm: 1, mussel: .8, krill: .5 }, time: { dawn: .8, day: 1.3, dusk: .8, night: .1 }, peak: [6, 7, 8, 9, 10], size: [10, 22], k: 16, price: 3500, power: .2, bite: 'tick', base: 1.2, chum: 1.1, col: '#6a8f5a', h: .24, reg: { '동해': 1, '남해': 1.4, '서해': .6, '제주': 1.3 }, tip: '알록달록한 잡어. 낮에만 활동하고 밤엔 모래에 숨어요.' },
+  { id: 'jwinore', name: '쥐노래미', junk: true, depth: [4, 12], baits: { worm: 1, crab: .8, mussel: .6 }, time: { dawn: 1, day: 1, dusk: 1, night: 1.2 }, peak: [10, 11, 12, 1, 2, 3], size: [20, 45], k: 14, price: 18000, power: .5, bite: 'sharp', base: .8, chum: 1, col: '#6b5230', h: .22, reg: { '동해': 1.2, '남해': 1, '서해': .8, '제주': .5 }, tip: '바위틈에 숨어 있다가 확 물고 들어가요. 회로 인기가 좋은 부수입 어종.' },
+  { id: 'sung',    name: '숭어',     junk: true, depth: [0, 3], baits: { worm: .8, krill: .5 }, time: { dawn: 1, day: 1.3, dusk: 1, night: .3 }, peak: [9, 10, 11, 12, 1], size: [30, 70], k: 11, price: 9000, power: .6, bite: 'slow', base: .6, chum: 1.8, col: '#9aa5a8', h: .2, reg: { '동해': .6, '남해': 1, '서해': 1.5, '제주': .3 }, tiers: { small: 1.3, mid: 1.2, rock: .5, yeo: .3 }, tip: '항구 안쪽 표층을 떼로 다녀요. 점프도 하고 힘이 좋아요.' },
+  { id: 'bori',    name: '보리멸',   junk: true, depth: [1, 5], baits: { worm: 1, krill: .5 }, time: { dawn: 1, day: 1.3, dusk: .9, night: .1 }, peak: [6, 7, 8, 9], size: [15, 28], k: 12, price: 12000, power: .25, bite: 'tick', base: .9, chum: 1.2, col: '#d6c9a5', h: .1, reg: { '동해': 1, '남해': 1, '서해': 1.5, '제주': .5 }, tiers: { small: 1.3, mid: 1.2, rock: .6, yeo: .3 }, tip: '모래 바닥을 좋아하는 날씬한 고기. 튀김용으로 인기가 좋아요.' },
+  { id: 'yeol',    name: '불볼락',   junk: true, depth: [4, 12], baits: { krill: 1, worm: .9 }, time: { dawn: 1.2, day: .5, dusk: 1.4, night: 1.5 }, peak: [10, 11, 12, 1, 2, 3, 4], size: [15, 30], k: 17, price: 16000, power: .35, bite: 'slow', base: .8, chum: 1.3, col: '#c24a3a', h: .2, reg: { '동해': 1.6, '남해': 1.2, '서해': .3, '제주': .6 }, tip: '열기라고도 불러요. 빨간 몸으로 밤과 해질녘에 잘 올라와요.' },
+  { id: 'gal',     name: '갈치',     junk: true, depth: [1, 8], baits: { krill: 1, worm: .6 }, time: { dawn: 1, day: .2, dusk: 1.3, night: 1.8 }, peak: [8, 9, 10, 11], size: [60, 110], k: 1.2, price: 22000, power: .45, bite: 'sharp', base: .6, chum: 1.4, col: '#c9d4d8', h: .06, reg: { '동해': .3, '남해': 1.4, '서해': .6, '제주': 1.3 }, tiers: { rock: 1.2, big: 1.3, yeo: 1.1 }, tip: '밤에 불빛 아래로 올라오는 은빛 칼. 이빨이 날카로워 줄이 잘 터져요.' },
+  { id: 'sam',     name: '삼치',     junk: true, depth: [1, 6], baits: { krill: .5, worm: .5 }, time: { dawn: 1.5, day: .6, dusk: 1.4, night: .2 }, peak: [9, 10, 11], size: [45, 90], k: 6, price: 15000, power: .8, bite: 'dive', base: .35, chum: 1.3, col: '#7d8f9a', h: .14, reg: { '동해': 1.4, '남해': 1.2, '서해': .5, '제주': .8 }, tiers: { small: .4, mid: .8, rock: 1.2, big: 1.4, yeo: 1.3 }, tip: '가을에 몰려드는 빠른 사냥꾼. 차고 나가는 힘이 대단해요.' },
+  { id: 'jeon',    name: '전어',     junk: true, depth: [1, 5], baits: { krill: 1, worm: .4 }, time: { dawn: 1, day: 1.1, dusk: 1.1, night: .4 }, peak: [8, 9, 10, 11], size: [15, 30], k: 13, price: 9000, power: .25, bite: 'tick', base: 1.2, chum: 2, col: '#9db5bd', h: .26, reg: { '동해': .2, '남해': 1.3, '서해': 1.6, '제주': .2 }, tiers: { small: 1.3, mid: 1.2, rock: .5, yeo: .3 }, tip: '가을 전어! 밑밥에 떼로 모여요. 가을철 효자 어종.' },
+  { id: 'seong',   name: '성대',     junk: true, depth: [6, 14], baits: { worm: 1, krill: .6, crab: .5 }, time: { dawn: .8, day: 1, dusk: 1, night: 1.2 }, peak: [5, 6, 7, 8, 9, 10], size: [20, 40], k: 13, price: 7000, power: .3, bite: 'slow', base: .7, chum: 1, col: '#c96a4a', h: .2, reg: { '동해': .8, '남해': 1.3, '서해': 1.2, '제주': .5 }, tip: '바닥을 기어 다니는 큰 가슴지느러미 물고기. 바닥을 긁으면 올라와요.' }
 ];
+SPOT_DEFS.sort((a, b) => a[4] - b[4]);
+const SPOTS = SPOT_DEFS.map(([id, name, region, tier, lv, desc], i) => {
+  const T = TIERS[tier], r = REGION[region] || {}, mult = {}, u = (i * 37 % 10) / 9, loc = SPOT_LOC[id] || {};
+  for (const k in T.base) mult[k] = Math.round(T.base[k] * (r[k] == null ? 1 : r[k]) * (loc[k] == null ? 1 : loc[k]) * 100) / 100;
+  for (const f of FISH) if (f.reg) { const m = (f.reg[region] || 0) * (f.tiers && f.tiers[tier] != null ? f.tiers[tier] : 1) * (loc[f.id] == null ? 1 : loc[f.id]); if (m > 0) mult[f.id] = Math.round(m * 100) / 100; }
+  return { tideAmp: TIDE_AMP[region] || .1, id, name, region, tier, tierLabel: T.label, type: T.type, stand: T.stand, lv, desc, mult, zone: T.zone, exp: T.exp, seed: i,
+    depth: Math.round(T.depth[0] + (T.depth[1] - T.depth[0]) * u), flow: Math.round((T.flow[0] + (T.flow[1] - T.flow[0]) * u) * 100) / 100 };
+});
+
 
 const WX = {
   calm:  { name: '잔잔', bite: .95 },
@@ -2290,10 +2350,10 @@ const SFX = {
     if (!this.ctx) return; const m = G.mode;
     if (m === 'fight' && G.fight) {
       const F = G.fight, R = reelItem(); this.setDrag(F.dragOut || 0, R.q);
-      this._duck = (F.dragOut || 0) > .05 ? 1 : 0;
+      this._duck = this._warn ? 2 : (F.dragOut || 0) > .05 ? 1 : 0;
       if (G.reeling && !(G.lever && R.type === 'lever')) { this.crankT -= dt; if (this.crankT <= 0) { this.crank(); this.crankT = .085 - Math.min(.03, R.speed * .1); } }
     } else { this._duck = 0; if (this.dr) this.setDrag(0, .5); }
-    if (this.mus && this.musicOn && (this._duck || 0) !== this._duckS) { this._duckS = this._duck || 0; this.mus.gain.setTargetAtTime(this._duckS ? .14 : .5, this.ctx.currentTime, this._duckS ? .08 : .5); }
+    if (this.mus && this.musicOn && (this._duck || 0) !== this._duckS) { this._duckS = this._duck || 0; this.mus.gain.setTargetAtTime([.5, .14, .05][this._duckS], this.ctx.currentTime, this._duckS ? .06 : .5); }
   }
 };
 ['pointerdown', 'keydown', 'touchstart'].forEach(ev => window.addEventListener(ev, () => SFX.unlock(), { passive: true }));
@@ -2327,6 +2387,28 @@ Object.assign(SFX, {
     g.gain.setValueAtTime(0, t); g.gain.linearRampToValueAtTime(peak, t + att); g.gain.setTargetAtTime(0, t + att + dur * .55, dur * .22);
     o.connect(g); g.connect(out || this.mus); if (!out || !out._nosend) g.connect(this.send); o.start(t); o.stop(t + att + dur + .3);
   },
+  _gbus() {
+    if (this.gIn) return; const c = this.ctx; this.gIn = c.createGain(); this.gIn.gain.value = 1;
+    const ws = c.createWaveShaper(), n = 1024, cv = new Float32Array(n); for (let i = 0; i < n; i++) { const x = i / (n - 1) * 2 - 1; cv[i] = Math.tanh(x * 7) * .9 + Math.sin(x * 9) * .03; } ws.curve = cv; ws.oversample = '4x';
+    const hp = c.createBiquadFilter(); hp.type = 'highpass'; hp.frequency.value = 110; const pk = c.createBiquadFilter(); pk.type = 'peaking'; pk.frequency.value = 1500; pk.gain.value = 5; pk.Q.value = .8;
+    const lp = c.createBiquadFilter(); lp.type = 'lowpass'; lp.frequency.value = 4200; this.gOut = c.createGain(); this.gOut.gain.value = .5;
+    this.gIn.connect(hp); hp.connect(ws); ws.connect(pk); pk.connect(lp); lp.connect(this.gOut); this.gOut.connect(this.mus); this.gOut.connect(this.send);
+  },
+  /* 일렉기타: 파워코드 / 리드 */
+  _gtr(t, m, dur, v, mute, bend) {
+    this._gbus(); const c = this.ctx, f = this._f(m);
+    [1, 1.006].forEach((d, k) => { const o = c.createOscillator(), g = c.createGain(); o.type = 'sawtooth'; o.frequency.setValueAtTime(bend ? f * Math.pow(2, -bend / 12) : f * d, t); if (bend) o.frequency.exponentialRampToValueAtTime(f * d, t + .06);
+      g.gain.setValueAtTime(0, t); g.gain.linearRampToValueAtTime(v, t + .004); g.gain.setTargetAtTime(0, t + (mute ? .03 : dur * .6), mute ? .03 : dur * .2);
+      o.connect(g); g.connect(this.gIn); o.start(t); o.stop(t + dur + .4); });
+  },
+  _power(t, root, dur, v, mute) { this._gtr(t, root, dur, v, mute); this._gtr(t, root + 7, dur, v * .9, mute); this._gtr(t, root + 12, dur, v * .7, mute); },
+  _lead(t, m, dur, v) {
+    this._gbus(); const c = this.ctx, f = this._f(m), o = c.createOscillator(), o2 = c.createOscillator(), g = c.createGain(), lf = c.createOscillator(), lg = c.createGain();
+    o.type = 'sawtooth'; o2.type = 'square'; o.frequency.setValueAtTime(f * .94, t); o.frequency.exponentialRampToValueAtTime(f, t + .07); o2.frequency.setValueAtTime(f * .94, t); o2.frequency.exponentialRampToValueAtTime(f * 1.002, t + .07);
+    lf.frequency.value = 5.5; lg.gain.setValueAtTime(0, t); lg.gain.linearRampToValueAtTime(f * .012, t + dur * .6); lf.connect(lg); lg.connect(o.frequency); lg.connect(o2.frequency);
+    g.gain.setValueAtTime(0, t); g.gain.linearRampToValueAtTime(v, t + .01); g.gain.setTargetAtTime(0, t + dur * .75, dur * .12);
+    const g2 = c.createGain(); g2.gain.value = .5; o.connect(g); o2.connect(g2); g2.connect(g); g.connect(this.gIn); [o, o2, lf].forEach(x => { x.start(t); x.stop(t + dur + .4); });
+  },
   _drum(fn) { const m = this.master; this.master = this.mus; try { fn(); } finally { this.master = m; } },
   _kick(t, v) { this._drum(() => { this._tone(t, 150, .13, 'sine', .62 * v, 42); this._noise(t, .02, 'highpass', 3000, 2500, .12 * v, .8); }); },
   _clap(t, v) { this._drum(() => { this._noise(t, .13, 'bandpass', 1900, 1300, .32 * v, .9); this._noise(t + .012, .08, 'highpass', 4500, 3500, .12 * v, .8); }); },
@@ -2347,7 +2429,7 @@ Object.assign(SFX, {
       const pg = PROG[mood], ch = pg[this.chordN++ % 4]; this.cur = ch;
       const iv = ch[1] === 'M' ? [0, 7, 11, 16] : [0, 7, 10, 15], dur = sl * clen;
       const g = this.ctx.createGain(); g.gain.value = 1; g._nosend = true; g.connect(this.mus); g.connect(this.send); this.padG = g;
-      iv.forEach((x, i) => { const f = this._f(ch[0] + 12 + x), lv = (mood === 'night' ? .03 : fight ? .04 : .045) * (i === 0 ? 1.1 : .9); this._voice(t, f * 1.003, dur, lv, fight ? .08 : .5, fight ? 'sawtooth' : 'triangle', g); this._voice(t, f * .997, dur, lv, fight ? .08 : .5, 'triangle', g); });
+      iv.forEach((x, i) => { const f = this._f(ch[0] + 12 + x), lv = (mood === 'night' ? .03 : fight ? .02 : .045) * (i === 0 ? 1.1 : .9); this._voice(t, f * 1.003, dur, lv, fight ? .08 : .5, fight ? 'sawtooth' : 'triangle', g); this._voice(t, f * .997, dur, lv, fight ? .08 : .5, 'triangle', g); });
     }
     const ch = this.cur || [48, 'M'], root = ch[0], maj = ch[1] === 'M';
     /* 리듬 */
@@ -2362,8 +2444,10 @@ Object.assign(SFX, {
     const tones = [0, maj ? 4 : 3, 7, 12, maj ? 16 : 15, 19];
     if (fight) {
       const a = [0, 2, 4, 2, 1, 3, 5, 3][pos % 8], f = this._f(root + 24 + tones[a] - (a > 4 ? 12 : 0));
-      this._voice(t, f, sl * 1.1, .05, .004, 'square'); 
-      if (pos % 2 === 0 && Math.random() < .8) { const pent = [0, 2, 4, 7, 9, 12, 14, 16]; const n = pent[Math.floor(Math.random() * pent.length)]; const fm = this._f(root + 36 + (maj ? n : n - (n === 4 ? 1 : 0))); this._voice(t, fm, sl * 1.6, .09, .008, 'triangle'); this._voice(t, fm * 2, sl * .8, .02, .006, 'sine'); }
+      this._voice(t, f, sl * 1.1, .02, .004, 'square');
+      const gr = root - 12;   // 리듬 기타: 팜뮤트 칭칭 + 열린 코드
+      if (pos === 0) this._power(t, gr, sl * 3.2, .1, false); else if (pos === 4) this._power(t, gr, sl * 2.2, .09, false); else if (pos === 3 || pos === 7) this._power(t, gr, sl * .6, .06, true); else this._power(t, gr, sl * .5, pos % 2 ? .06 : .08, true);
+      if (pos % 2 === 0 && Math.random() < .85) { const bl = [0, 3, 5, 7, 10, 12, 15, 17], n = bl[Math.floor(Math.random() * bl.length)]; this._lead(t, root + 24 + n - (maj && n === 3 ? -1 : 0), sl * (Math.random() < .35 ? 3 : 1.6), .07); }
     } else {
       const pent = [0, 2, 4, 7, 9, 12, 14], pr = mood === 'bright' ? .7 : mood === 'mellow' ? .6 : .5;
       if (pos % 2 === 0 ? Math.random() < pr : Math.random() < pr * .3) {
@@ -2842,7 +2926,7 @@ function renderDex() {
     const d = G.dex[f.id], card = document.createElement('div'); card.className = 'card' + (d ? '' : ' lock');
     if (d) {
       const top2 = Object.keys(f.baits).sort((a, b) => f.baits[b] - f.baits[a]).slice(0, 2).map(id => BAITS.find(x => x.id === id).name).join('·');
-      card.innerHTML = '<img class="fimg" alt="' + f.name + '" src="' + fishURL(f, false) + '"><h3>' + f.name + '</h3><p>' + f.tip + '</p><p class="mono">최대 ' + d.maxL + 'cm · ' + d.n + '마리</p><p>수심 ' + f.depth[0] + '~' + f.depth[1] + 'm · ' + top2 + '</p>';
+      card.innerHTML = '<img class="fimg" alt="' + f.name + '" src="' + fishURL(f, false) + '"><h3>' + f.name + (f.junk ? ' <small style="color:var(--mute);font-weight:400">잡어</small>' : '') + '</h3><p>' + f.tip + '</p><p class="mono">최대 ' + d.maxL + 'cm · ' + d.n + '마리</p><p>수심 ' + f.depth[0] + '~' + f.depth[1] + 'm · ' + top2 + '</p>';
     } else card.innerHTML = '<img class="fimg" alt="미발견" src="' + fishURL(f, true) + '"><h3>???</h3><p>아직 만나지 못했어요</p>';
     grid.appendChild(card);
   });
@@ -2948,7 +3032,7 @@ function loop(now) {
   const dt = Math.min(.05, (now - prev) / 1000); prev = now;
   update(dt);
   if (GLOK) { sceneStep(dt); sceneFx(dt); sceneRender(); overlayDraw(dt); }
-  SFX.update(dt); dragUI(); { const F = G.fight, w = $('warn'); if (w) w.classList.toggle('on', G.mode === 'fight' && !!F && F.tension > (F.SN || .9) * .88); }
+  SFX.update(dt); dragUI(); { const F = G.fight, w = $('warn'); const on = G.mode === 'fight' && !!F && F.tension > (F.SN || .9) * .88; SFX._warn = on; if (w) w.classList.toggle('on', on); }
   syncUI(); hud(dt);
   requestAnimationFrame(loop);
 }
@@ -2993,7 +3077,9 @@ function dragUI() {
 }
 
 /* 모바일 레이아웃: 좌측 메뉴 · 하단 퀵슬롯 · 팝업 */
-document.querySelectorAll('#rail [data-open]').forEach(b => b.addEventListener('click', () => { $('menu').hidden = false; openTab(b.dataset.open); }));
+document.querySelectorAll('#rail [data-open]').forEach(b => b.addEventListener('click', () => { $('rail').classList.remove('open'); $('menu').hidden = false; openTab(b.dataset.open); }));
+$('rail-t').addEventListener('click', e => { e.stopPropagation(); $('rail').classList.toggle('open'); });
+document.addEventListener('pointerdown', e => { if (!e.target.closest('#rail')) $('rail').classList.remove('open'); });
 document.querySelectorAll('[data-pop]').forEach(b => b.addEventListener('click', e => { e.stopPropagation(); const id = b.dataset.pop; document.querySelectorAll('.pop').forEach(p => { p.hidden = p.id === id ? !p.hidden : true; }); }));
 document.addEventListener('pointerdown', e => { if (!e.target.closest('.pop') && !e.target.closest('[data-pop]')) document.querySelectorAll('.pop').forEach(p => p.hidden = true); });
 $('baits').addEventListener('click', () => setTimeout(() => { $('pop-bait').hidden = true; }, 120));
