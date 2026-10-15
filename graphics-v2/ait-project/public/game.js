@@ -2316,10 +2316,50 @@ function drawRealisticFish(c, f, W, H, silhouette) {
   c.restore();
 }
 
+/* AI 생성 실사풍 래스터. 종 식별용 표본 사진이 아닌 게임 연출용 이미지입니다. */
+const PHOTO_FISH_IDS=['hak','aji','mang','nore','jwi','bol','ureok','beng','gam','nong','cham','dol','bok','mi','dok','hwang','godeung','nol','jwinore','sung','bori','yeol','gal','sam','jeon','seong'];
+const PHOTO_FISH_ROWS=[0,274,505,735,965,1170,1395,1659];
+const PHOTO_FISH_EXTRA={mi:0,dok:1,hwang:2,seong:3};
+const PHOTO_FISH={images:{},last:null,failed:false};
+function photoFishRect(f){
+ const extra=PHOTO_FISH_EXTRA[f.id];
+ if(extra!==undefined)return {key:'special',rect:[extra%2*768,Math.floor(extra/2)*512,768,512]};
+ const i=PHOTO_FISH_IDS.indexOf(f.id);if(i<0)return null;const row=Math.floor(i/4);
+ return {key:'coastal',rect:[i%4*237,PHOTO_FISH_ROWS[row],237,PHOTO_FISH_ROWS[row+1]-PHOTO_FISH_ROWS[row]]};
+}
+function loadPhotoFish(){
+ const base=window.FISH_PHOTO_BASE||'./fish-photos/';
+ for(const key of ['coastal','special']){
+  const im=new Image();PHOTO_FISH.images[key]=im;
+  im.onload=()=>{if(PHOTO_FISH.last){const {f,L}=PHOTO_FISH.last;drawResultFish(f,L);}};
+  im.onerror=()=>{PHOTO_FISH.failed=true;};im.src=base+key+'-atlas.png';
+ }
+}
+function drawPhotoFish(c,f,W,H){
+ const item=photoFishRect(f);if(!item)return false;const im=PHOTO_FISH.images[item.key];
+ if(!im||!im.complete||!im.naturalWidth)return false;
+ const [sx,sy,sw,sh]=item.rect;
+ // Sprite-specific source bounds retain all fins while eliminating atlas gutters.
+ const bounds=PHOTO_FISH.bounds||(PHOTO_FISH.bounds={});const cacheKey=item.key+':'+f.id;
+ let b=bounds[cacheKey];
+ if(!b){
+  // Tight bounds are precomputed from alpha; no canvas pixel reads, works on file://.
+  b=PHOTO_FISH_BOUNDS[f.id]||[0,0,sw,sh];bounds[cacheKey]=b;
+ }
+ const [bx,by,bw,bh]=b,scale=Math.min(W*.90/bw,H*.82/bh),dw=bw*scale,dh=bh*scale;
+ c.save();c.imageSmoothingEnabled=true;c.imageSmoothingQuality='high';
+ c.shadowColor='rgba(0,0,0,.20)';c.shadowBlur=Math.min(18,W*.018);c.shadowOffsetY=H*.025;
+ c.drawImage(im,sx+bx,sy+by,bw,bh,(W-dw)/2,(H-dh)/2,dw,dh);c.restore();return true;
+}
+
+const PHOTO_FISH_BOUNDS={"hak": [10, 145, 224, 54], "aji": [11, 129, 218, 77], "mang": [6, 88, 214, 151], "nore": [0, 116, 225, 109], "jwi": [5, 34, 228, 159], "bol": [9, 55, 221, 123], "ureok": [7, 54, 218, 126], "beng": [0, 47, 231, 142], "gam": [8, 42, 226, 150], "nong": [7, 72, 225, 94], "cham": [4, 38, 229, 154], "dol": [7, 37, 226, 156], "bok": [7, 78, 228, 88], "mi": [34, 67, 734, 388], "dok": [0, 66, 744, 446], "hwang": [17, 56, 747, 297], "godeung": [7, 57, 228, 93], "nol": [9, 52, 223, 111], "jwinore": [4, 55, 222, 98], "sung": [0, 61, 231, 98], "bori": [7, 73, 226, 88], "yeol": [7, 40, 222, 134], "gal": [3, 41, 223, 147], "sam": [0, 60, 228, 93], "jeon": [5, 53, 229, 125], "seong": [0, 0, 757, 434]};
+loadPhotoFish();
+
 function drawResultFish(f,L){
+ PHOTO_FISH.last={f,L};
  const rc=document.getElementById('res-fish'),c=rc.getContext('2d');
  rc.width=1200;rc.height=440;c.clearRect(0,0,rc.width,rc.height);
- drawRealisticFish(c,f,rc.width,rc.height,false);
+ if(!drawPhotoFish(c,f,rc.width,rc.height))drawRealisticFish(c,f,rc.width,rc.height,false);
 }
 
 /* ===== 도감 · 상점 이미지 (캔버스로 그려서 dataURL 캐시) ===== */
