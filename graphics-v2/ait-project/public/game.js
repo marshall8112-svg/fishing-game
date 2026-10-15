@@ -2220,11 +2220,106 @@ function drawFish(c, x, y, len, dir, f, alpha) {
 
 /* 주변을 헤엄치는 물고기 */
 /* 조과 카드용 물고기 그림 */
-function drawResultFish(f, L) {
-  const rc = document.getElementById('res-fish'), c = rc.getContext('2d');
-  c.setTransform(1, 0, 0, 1, 0, 0); c.clearRect(0, 0, rc.width, rc.height);
-  const rel = (L - f.size[0]) / (f.size[1] - f.size[0]), len = Math.min(210 + rel * 150, rc.height * .42 / f.h);
-  drawFish(c, rc.width / 2, rc.height / 2, len, 1, f, 1);
+/* 조과·도감용 실사풍 물고기. 외부 이미지 없이 종별 형태와 표면을 Canvas로 렌더링. */
+function drawRealisticFish(c, f, W, H, silhouette) {
+  const look=FISH_LOOK[f.id]||{H:Math.max(.16,f.h*1.6),tail:'fork',dors:'long'};
+  const st=FSTYLE[f.id]||{back:'#40565d',side:f.col,belly:'#e3e8df',fin:'#687d78'};
+  const R=rnd([...f.id].reduce((v,x)=>v*31+x.charCodeAt(0),27));
+  const tall=look.H, beak=look.beak||0;
+  const len=Math.min(W*.77/(1+beak),H*.65/(tall*(look.tail==='fork'?1.30:1.14)));
+  const bh=len*tall, left=(W-len*(1.24+beak))/2+len*.24, right=left+len, cy=H*.54;
+  const env=t=>Math.pow(Math.max(0,Math.sin(Math.PI*Math.pow(clamp(t,0,1),look.puff?.57:.83))),look.diamond?1.12:.74);
+  const up=t=>bh*env(t)*(.53+(look.forehead&&t>.7?(t-.7)*.28:0));
+  const down=t=>bh*env(t)*(look.puff?.56:.41);
+  const body=()=>{
+    c.beginPath();c.moveTo(left,cy);
+    for(let j=0;j<=100;j++){let t=j/100;c.lineTo(left+len*t,cy-up(t));}
+    if(beak){c.lineTo(right+len*beak,cy+bh*.015);c.lineTo(right,cy+bh*.052);}
+    for(let j=100;j>=0;j--){let t=j/100;c.lineTo(left+len*t,cy+down(t));}c.closePath();
+  };
+  const line=(a,b,color,width)=>{c.beginPath();c.moveTo(...a);c.lineTo(...b);c.strokeStyle=color;c.lineWidth=width;c.stroke();};
+  const fin=(base,edge,color)=>{
+    c.beginPath();c.moveTo(...base[0]);edge.forEach(p=>c.lineTo(...p));c.lineTo(...base[base.length-1]);c.closePath();
+    let g=c.createLinearGradient(0,cy-bh,0,cy+bh);g.addColorStop(0,shade(color,.72));g.addColorStop(.5,lerpHex(color,'#d0d7cb',.25));g.addColorStop(1,shade(color,.65));
+    c.fillStyle=silhouette?'#122833':g;c.fill();
+    if(!silhouette){c.save();c.clip();for(let j=0;j<edge.length;j++){let t=j/Math.max(1,edge.length-1),b=base[Math.min(base.length-1,Math.round(t*(base.length-1)))];line(b,edge[j],'rgba(27,36,33,.55)',Math.max(.45,len*.0011));line([b[0]+len*.0012,b[1]], [edge[j][0]+len*.0012,edge[j][1]],'rgba(226,228,199,.35)',Math.max(.3,len*.0007));}c.restore();}
+    c.strokeStyle=silhouette?'#122833':shade(color,.66);c.lineWidth=Math.max(.6,len*.0012);c.stroke();
+  };
+  c.save();c.lineJoin='round';c.lineCap='round';
+  // Soft contact shadow keeps the specimen separate from the result background.
+  if(!silhouette){c.save();c.globalAlpha=.22;c.fillStyle='#000';c.filter='blur('+Math.max(2,len*.018)+'px)';c.beginPath();c.ellipse(left+len*.5,cy+bh*.52,len*.43,bh*.075+1,0,0,Math.PI*2);c.fill();c.restore();}
+  const tailEdge=[],tailBase=[];
+  for(let j=0;j<=24;j++){
+    const t=j/24,y=cy+(t-.5)*bh*(look.tail==='fork'?1.05:.88);
+    const depth=look.tail==='fork'?(.10+.12*Math.abs(t-.5)*2):(.13+.055*Math.sin(t*Math.PI));
+    tailEdge.push([left-len*depth,y]);tailBase.push([left+len*.045,cy+(t-.5)*bh*.13]);
+  }
+  fin(tailBase,tailEdge,st.tail||st.fin);
+  // Dorsal spine rays vary between species; no generic triangular fin.
+  const dorsal=(a,b,height,spiny)=>{
+    let base=[],edge=[],n=26;
+    for(let j=0;j<=n;j++){let t=a+(b-a)*j/n,x=left+len*t,y=cy-up(t)+bh*.022;let v=Math.pow(Math.sin(Math.PI*j/n),.65);if(spiny)v*=j%2?.83:1;
+      base.push([x,y]);edge.push([x-len*.012,y-bh*height*v]);}
+    fin(base,edge,st.fin);
+  };
+  if(look.dors==='two'){dorsal(.22,.46,.28,true);dorsal(.51,.78,.29,true);}
+  else if(look.dors==='small')dorsal(.24,.46,.18,false);
+  else if(look.dors==='back')dorsal(.15,.32,.38,false);
+  else dorsal(.15,.80,look.dors==='spine'?.38:.27,true);
+  let ab=[],ae=[];
+  for(let j=0;j<=18;j++){let t=.22+j/18*.29,x=left+len*t,y=cy+down(t)-bh*.015;ab.push([x,y]);ae.push([x-len*.018,y+Math.sin(j/18*Math.PI)*bh*.23]);}
+  fin(ab,ae,st.fin);
+  body();
+  if(silhouette){c.fillStyle='#122833';c.fill();c.restore();return;}
+  let skin=c.createLinearGradient(0,cy-bh*.60,0,cy+bh*.47);
+  skin.addColorStop(0,shade(st.back,.78));skin.addColorStop(.24,st.back);skin.addColorStop(.46,st.side);skin.addColorStop(.62,lerpHex(st.side,st.belly,.40));skin.addColorStop(.86,st.belly);skin.addColorStop(1,shade(st.belly,.70));c.fillStyle=skin;c.fill();
+  c.save();body();c.clip();
+  // Dense, offset scale rows following the body's rounded cross section.
+  const pitch=len/(f.id==='hak'||f.id==='gal'?110:68),rows=Math.max(12,Math.round(bh/pitch));
+  for(let row=-rows;row<=rows;row++){
+    const y=cy+row*pitch*.69,shadeAlpha=.10+Math.max(0,-row/rows)*.10;
+    for(let col=0;col<70;col++){
+      let x=left+len*.09+col*pitch+(row%2?pitch*.5:0);if(x>right-len*.19)break;
+      const variation=.74+R()*.50,rx=pitch*.52,ry=pitch*.43;
+      c.beginPath();c.ellipse(x,y,rx,ry,0,-1.2,1.2);c.strokeStyle='rgba(18,33,40,'+shadeAlpha*variation+')';c.lineWidth=Math.max(.28,len*.00072);c.stroke();
+      c.beginPath();c.ellipse(x-pitch*.09,y-pitch*.13,rx*.86,ry*.78,0,-1.45,.6);c.strokeStyle='rgba(235,247,237,'+(.10+R()*.17)+')';c.lineWidth=Math.max(.3,len*.00065);c.stroke();
+    }
+  }
+  // Species markings: curved bands, small spots and a reflective lateral line.
+  if(look.bandsN||look.bars||f.id==='gam'){
+    let n=look.bandsN||(look.bars?5:7);
+    for(let j=0;j<n;j++){let x=left+len*(.14+j*.68/n);c.beginPath();c.moveTo(x,cy-bh*.7);c.bezierCurveTo(x+len*.035,cy-bh*.15,x-len*.025,cy+bh*.2,x-len*.02,cy+bh*.6);c.strokeStyle=look.bandsN?'rgba(12,22,28,.80)':look.bars?'rgba(39,23,12,.40)':'rgba(30,48,59,.20)';c.lineWidth=len*(look.bandsN?.05:.018);c.stroke();}
+  }
+  if(look.spots||st.spots){for(let j=0;j<160;j++){let t=.12+R()*.70,x=left+len*t,y=cy+(R()-.66)*bh*.83;const size=len*(look.spots==='blue'?.0018:.0015+R()*.003);c.beginPath();c.ellipse(x,y,size,size*.65,R(),0,Math.PI*2);c.fillStyle=look.spots==='blue'?'rgba(65,170,214,.88)':(st.spots||'rgba(30,43,40,.43)');c.fill();}}
+  c.beginPath();c.moveTo(left+len*.09,cy);c.bezierCurveTo(left+len*.3,cy-bh*.08,left+len*.56,cy-bh*.09,left+len*.77,cy-bh*.14);c.strokeStyle='rgba(49,65,65,.45)';c.lineWidth=Math.max(.6,len*.002);c.stroke();
+  c.translate(0,-bh*.014);c.strokeStyle='rgba(240,248,232,.46)';c.lineWidth=Math.max(.4,len*.001);c.stroke();c.translate(0,bh*.014);
+  // Broad wet specular streak and dim violet/green iridescence.
+  let gloss=c.createLinearGradient(0,cy-bh*.30,0,cy+bh*.22);gloss.addColorStop(0,'rgba(180,215,244,0)');gloss.addColorStop(.40,'rgba(186,228,224,.08)');gloss.addColorStop(.52,'rgba(255,255,247,.38)');gloss.addColorStop(.62,'rgba(192,195,234,.11)');gloss.addColorStop(1,'rgba(180,215,244,0)');c.fillStyle=gloss;c.fillRect(left,cy-bh,len,bh*2);
+  // Gill plate is a shaded curved surface, with a second lighter edge.
+  const gx=right-len*.23;
+  c.beginPath();c.moveTo(gx+len*.035,cy-bh*.35);c.bezierCurveTo(gx-len*.055,cy-bh*.06,gx-len*.045,cy+bh*.20,gx+len*.005,cy+bh*.30);c.strokeStyle='rgba(17,26,31,.62)';c.lineWidth=Math.max(.8,len*.0035);c.stroke();
+  c.beginPath();c.moveTo(gx+len*.045,cy-bh*.34);c.bezierCurveTo(gx-len*.034,cy-bh*.05,gx-len*.025,cy+bh*.17,gx+len*.018,cy+bh*.28);c.strokeStyle='rgba(238,240,222,.58)';c.lineWidth=Math.max(.6,len*.002);c.stroke();
+  // Minute deterministic pigment grain, drawn once into cached artwork.
+  for(let j=0;j<2100;j++){let x=left+R()*len,y=cy+(R()-.5)*bh*1.2;c.fillStyle=j%3?'rgba(18,35,39,.035)':'rgba(245,246,219,.09)';c.fillRect(x,y,Math.max(.35,len*.0009),Math.max(.3,len*.0007));}
+  c.restore();
+  let pb=[],pe=[];const root=[right-len*.245,cy+bh*.09];
+  for(let j=0;j<=20;j++){let t=j/20;pb.push(root);pe.push([root[0]-len*(.07+.12*Math.sin(t*Math.PI*.8)),root[1]+bh*(.035+.28*t)]);}
+  c.save();c.globalAlpha=.70;fin(pb,pe,st.fin);c.restore();
+  // Eye: dark globe, metallic iris ring and a small lens reflection.
+  const ex=right-len*.115,ey=cy-bh*.105,er=Math.max(len*.008,bh*.058)*(look.eye?1.14:1);
+  c.beginPath();c.ellipse(ex,ey,er*1.34,er*1.16,-.12,0,Math.PI*2);c.fillStyle=shade(st.back,.5);c.fill();
+  let iris=c.createRadialGradient(ex-er*.3,ey-er*.3,er*.1,ex,ey,er);iris.addColorStop(0,'#c3ba80');iris.addColorStop(.7,'#8d916d');iris.addColorStop(1,'#354746');c.fillStyle=iris;c.beginPath();c.arc(ex,ey,er,0,Math.PI*2);c.fill();
+  c.beginPath();c.arc(ex+er*.06,ey,er*.61,0,Math.PI*2);c.fillStyle='#061318';c.fill();
+  c.beginPath();c.ellipse(ex-er*.20,ey-er*.30,er*.30,er*.14,-.4,0,Math.PI*2);c.fillStyle='rgba(255,255,250,.92)';c.fill();
+  c.beginPath();c.moveTo(right-len*.058,cy+bh*.035);c.quadraticCurveTo(right-len*.025,cy+bh*.075,right+beak*len,cy+bh*.025);c.strokeStyle='rgba(20,31,32,.72)';c.lineWidth=Math.max(.8,len*.002);c.stroke();
+  c.beginPath();c.ellipse(right-len*.054,cy-bh*.025,len*.0035,bh*.010,-.2,0,Math.PI*2);c.fillStyle='rgba(20,32,35,.75)';c.fill();
+  c.restore();
+}
+
+function drawResultFish(f,L){
+ const rc=document.getElementById('res-fish'),c=rc.getContext('2d');
+ rc.width=1200;rc.height=440;c.clearRect(0,0,rc.width,rc.height);
+ drawRealisticFish(c,f,rc.width,rc.height,false);
 }
 
 /* ===== 도감 · 상점 이미지 (캔버스로 그려서 dataURL 캐시) ===== */
@@ -2298,7 +2393,7 @@ function drawFishIcon(ctx, f, W, H, sil) {
 }
 function fishURL(f, sil) {
   const k = 'f' + f.id + (sil ? 's' : ''); if (ICON_CACHE[k]) return ICON_CACHE[k];
-  const [c, x] = mkCv(240, 140); drawFishIcon(x, f, 240, 140, sil);
+  const [c, x] = mkCv(240, 140); drawRealisticFish(x, f, 240, 140, sil);
   return ICON_CACHE[k] = c.toDataURL('image/png');
 }
 
