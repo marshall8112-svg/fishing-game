@@ -13,7 +13,27 @@ const AD_GROUP = (import.meta as any).env?.VITE_AD_GROUP_ID || TEST_AD;
 const KEYS = ['jjinaksi.v1', 'jjinaksi.rw', 'jjinaksi.q', 'jjinaksi.bgm', 'jjinaksi.snd'];
 
 /* 1) 가로 화면 */
-try { S.setDeviceOrientation?.({ type: 'landscape' }); } catch (e) {}
+async function requestLandscape() {
+  try {
+    const fn = S.Screen?.setOrientation ?? S.setDeviceOrientation;
+    if (fn && (!fn.isSupported || fn.isSupported())) await fn({ type: 'landscape' });
+  } catch (_) { /* Native rotation may be unsupported; CSS fallback remains playable. */ }
+}
+void requestLandscape();
+document.addEventListener('visibilitychange', () => { if (!document.hidden) void requestLandscape(); });
+window.addEventListener('pagehide', () => {
+  try { const fn = S.Screen?.setOrientation ?? S.setDeviceOrientation; Promise.resolve(fn?.({ type: 'portrait' })).catch(() => {}); } catch (_) {}
+});
+let lastHaptic = -Infinity;
+async function haptic(type = 'tickWeak') {
+  if (document.hidden || performance.now() - lastHaptic < 180) return;
+  lastHaptic = performance.now();
+  try {
+    const fn = S.Device?.triggerHaptic ?? S.generateHapticFeedback;
+    if (fn) { await fn({ type }); return; }
+  } catch (_) {}
+  try { navigator.vibrate?.(type === 'tickMedium' ? 25 : 12); } catch (_) {}
+}
 
 /* 2) 저장소: 앱인토스 Storage ↔ localStorage 동기화 (앱을 지웠다 깔아도 기록 유지에 도움) */
 async function restore() {
@@ -63,7 +83,7 @@ async function showAd(): Promise<boolean> {
 function track(name: string, props: any) {
   try { (S.Analytics?.logEvent ?? S.logEvent)?.(name, props); } catch (e) {}
 }
-(window as any).AIT = { isToss: true, adGroupId: AD_GROUP, preloadAd, showAd, track };
+(window as any).AIT = { isToss: true, adGroupId: AD_GROUP, preloadAd, showAd, track, requestLandscape, haptic };
 
 /* 4) 저장 기록 복원 후 게임 시작 */
 restore().finally(() => {

@@ -167,7 +167,14 @@ input[type=range]{width:100%;accent-color:var(--float);margin:2px 0}
 /* 세로 화면 안내 */
 #rot{position:fixed;inset:0;z-index:50;background:var(--ink);display:none;place-items:center;text-align:center;padding:24px;font-family:var(--font-display);font-size:22px}
 #rot span{display:block;font-size:56px;margin-bottom:10px}
-@media (orientation:portrait){#rot{display:grid}}
+/* Native rotation can fail in embedded WebViews. Never block gameplay. */
+#rot{display:none!important}
+html.virtual-landscape #stage{inset:auto;left:100%;top:0;width:var(--game-landscape-w);height:var(--game-landscape-h);transform:rotate(90deg);transform-origin:top left;--sl:14px;--sr:14px;--st:10px;--sb:10px}
+html.virtual-landscape.reverse-landscape #stage{left:0;top:100%;transform:rotate(-90deg)}
+#btn-flip{display:none}
+html.virtual-landscape #btn-flip{display:flex}
+#btn-haptic[aria-pressed="false"]{opacity:.5}
+
 @media (max-height:420px){.rig{top:calc(var(--st) + 64px)}.clock .mono{font-size:18px}.chip b{font-size:12px}}
 @media (prefers-reduced-motion:reduce){.toast,.rig{transition:none}}
 
@@ -298,6 +305,7 @@ body.hint-bite #btn-main{animation:dpulse .35s infinite alternate;box-shadow:0 0
     <div class="money glass"><span class="coin">●</span><b id="hud-money" class="mono">₩30,000</b></div>
     <button id="btn-bgm" class="glass rbtn" aria-label="배경음악">🎵</button>
     <button id="btn-snd" class="glass rbtn" aria-label="소리">🔊</button>
+    <button id="btn-flip" class="glass rbtn txt" aria-label="가로 화면 반대로 돌리기">↻</button><button id="btn-haptic" class="glass rbtn txt" aria-label="감기 진동" aria-pressed="true">진동</button>
     <button id="btn-q" class="glass rbtn txt" aria-label="화질">고화질</button>
     <button id="btn-gift" class="rbtn glass" aria-label="보상">🎁</button>
     <button id="btn-menu" class="glass rbtn" aria-label="메뉴">☰</button>

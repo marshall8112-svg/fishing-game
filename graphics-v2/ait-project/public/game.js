@@ -1,3 +1,23 @@
+/* Embedded WebView orientation recovery. No full-screen blocking overlay. */
+(function setupPlayableOrientation(){
+  const root=document.documentElement;
+  function updateLayout(){
+    const w=window.innerWidth||root.clientWidth,h=window.innerHeight||root.clientHeight;
+    const rotated=w<h;
+    root.classList.toggle('virtual-landscape',rotated);
+    root.style.setProperty('--game-landscape-w',h+'px');
+    root.style.setProperty('--game-landscape-h',w+'px');
+    const gate=document.getElementById('rot');if(gate){gate.hidden=true;gate.setAttribute('aria-hidden','true');}
+    requestAnimationFrame(()=>{try{if(GLC)resizeGL();}catch(_){}});
+  }
+  updateLayout();
+  window.addEventListener('resize',updateLayout);
+  window.addEventListener('orientationchange',updateLayout);
+  window.visualViewport?.addEventListener('resize',updateLayout);
+  document.addEventListener('visibilitychange',()=>{if(!document.hidden)updateLayout();});
+  const flip=document.getElementById('btn-flip');if(flip)flip.addEventListener('click',()=>{root.classList.toggle('reverse-landscape');updateLayout();});
+  document.addEventListener('pointerup',()=>{try{const p=window.AIT?.requestLandscape?.();if(p?.catch)p.catch(()=>{});}catch(_){}},{once:true});
+})();
 const MOB = matchMedia('(pointer:coarse)').matches || /Android|iPhone|iPad/i.test(navigator.userAgent);
 /* ================= 미니 WebGL2 엔진: 수학 · 지오메트리 · GL 도우미 ================= */
 const V3 = {
@@ -630,7 +650,7 @@ function drawRing(cx, cy, cz, r, col, w) {
 
 function resizeGL() {
   const r = GLC.getBoundingClientRect(), dpr = Math.min(window.devicePixelRatio || 1, ENV.q > .5 ? 2 : 1.25);
-  RS.w = Math.max(2, r.width); RS.h = Math.max(2, r.height); RS.dpr = dpr;
+  RS.w = Math.max(2, GLC.clientWidth || r.width); RS.h = Math.max(2, GLC.clientHeight || r.height); RS.dpr = dpr;
   const W = Math.round(RS.w * dpr), H = Math.round(RS.h * dpr);
   if (GLC.width !== W || GLC.height !== H) { GLC.width = W; GLC.height = H; }
   CAMR.asp = RS.w / RS.h;
@@ -1573,8 +1593,27 @@ function throwChum() {
 }
 
 /* ================= 프레임 갱신 ================= */
+/* Short reel pulses, never a long continuous vibration. */
+const FISHING_HAPTICS={
+  on:true,cool:0,active:false,
+  pulse(type){
+    if(!this.on||document.hidden)return;
+    try{const fn=window.AIT?.haptic;if(fn){Promise.resolve(fn(type)).catch(()=>{});return;}}catch(_){}
+    try{navigator.vibrate?.(type==='tickMedium'?25:12);}catch(_){}
+  },
+  update(dt){
+    const reeling=this.on&&!document.hidden&&G.mode==='fight'&&!!G.fight&&G.reeling&&!(G.lever&&reelItem().type==='lever');
+    if(!reeling){this.cool=0;this.active=false;return;}
+    this.cool-=dt;
+    if(!this.active||this.cool<=0){const strong=G.fight.tension>.65;this.pulse(strong?'tickMedium':'tickWeak');this.cool=strong?.28:.38;}
+    this.active=true;
+  }
+};
+try{FISHING_HAPTICS.on=localStorage.getItem('jjinaksi.haptic')!=='0';}catch(_){}
+
 function addRipple(x, scale) { G.ripples.push({ x, t: 0, dur: 1.8, s: scale || 1 }); }
 function update(dt) {
+  FISHING_HAPTICS.update(dt);
   G.t += dt; G.min = (G.min + dt * TS) % 1440;
   { const tg = tideTarget(), d = tg - (G.tide || 0); G.tide = Math.abs(d) > .8 ? tg : (G.tide || 0) + Math.max(-.02 * dt, Math.min(.02 * dt, d)); }   // 수위는 천천히만 변함
   G.wxTimer += dt * TS;
@@ -3166,3 +3205,11 @@ setTimeout(() => { const s = $('splash'); if (s) { s.classList.add('off'); setTi
   });
 })();
 
+
+const hapticButton=document.getElementById('btn-haptic');
+function syncHapticButton(){if(hapticButton){hapticButton.setAttribute('aria-pressed',String(FISHING_HAPTICS.on));hapticButton.textContent=FISHING_HAPTICS.on?'진동 켬':'진동 끔';}}
+syncHapticButton();
+hapticButton?.addEventListener('click',()=>{FISHING_HAPTICS.on=!FISHING_HAPTICS.on;FISHING_HAPTICS.cool=0;try{localStorage.setItem('jjinaksi.haptic',FISHING_HAPTICS.on?'1':'0');}catch(_){}syncHapticButton();if(FISHING_HAPTICS.on)FISHING_HAPTICS.pulse('tickWeak');});
+function stopReelFeedback(){G.reeling=false;FISHING_HAPTICS.active=false;FISHING_HAPTICS.cool=0;}
+window.addEventListener('blur',stopReelFeedback);
+document.addEventListener('visibilitychange',()=>{if(document.hidden)stopReelFeedback();});
